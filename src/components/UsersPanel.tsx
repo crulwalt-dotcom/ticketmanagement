@@ -140,24 +140,25 @@ export default function UsersPanel({
       <button
         type="button"
         aria-label="Close"
-        className="absolute inset-0 bg-[#201f1e]/45"
+        className="absolute inset-0"
+        style={{ background: "var(--overlay)" }}
         onClick={onClose}
       />
-      <aside className="relative z-10 flex h-full w-full max-w-[480px] animate-slide-in flex-col border-l border-[#edebe9] bg-white shadow-2xl">
-        <header className="flex items-start justify-between border-b border-[#edebe9] bg-[#faf9f8] px-5 py-4">
+      <aside className="relative z-10 flex h-full w-full max-w-[480px] animate-slide-in flex-col border-l border-[var(--border)] bg-[var(--surface)] shadow-2xl">
+        <header className="flex items-start justify-between border-b border-[var(--border)] bg-[var(--surface-2)] px-5 py-4">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#0078d4]">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--accent)]">
               Team
             </p>
-            <h2 className="text-xl font-semibold text-[#242424]">Manage users</h2>
-            <p className="mt-1 text-xs text-[#605e5c]">
+            <h2 className="text-xl font-semibold text-[var(--text)]">Manage users</h2>
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
               Add, edit, or remove people who can own tickets
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded px-2 py-1 text-lg text-[#605e5c] hover:bg-[#f3f2f1]"
+            className="rounded px-2 py-1 text-lg text-[var(--text-muted)] hover:bg-[var(--bg)]"
           >
             ✕
           </button>
@@ -165,7 +166,7 @@ export default function UsersPanel({
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {error && (
-            <p className="mb-3 rounded border border-[#f1aeb5] bg-[#fde7e9] px-3 py-2 text-sm text-[#a4262c]">
+            <p className="mb-3 rounded border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-sm text-[var(--danger)]">
               {error}
             </p>
           )}
@@ -175,7 +176,7 @@ export default function UsersPanel({
               <button
                 type="button"
                 onClick={startCreate}
-                className="mb-4 w-full rounded bg-[#0078d4] px-3 py-2 text-sm font-semibold text-white hover:bg-[#106ebe]"
+                className="mb-4 w-full rounded bg-[var(--accent)] px-3 py-2 text-sm font-semibold text-white hover:opacity-90"
               >
                 + Add user
               </button>
@@ -183,7 +184,7 @@ export default function UsersPanel({
                 {users.map((u) => (
                   <li
                     key={u.id}
-                    className="flex items-center gap-3 rounded border border-[#edebe9] bg-[#faf9f8] p-3"
+                    className="flex items-center gap-3 rounded border border-[var(--border)] bg-[var(--surface-2)] p-3"
                   >
                     <span
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
@@ -192,27 +193,27 @@ export default function UsersPanel({
                       {initials(u.name)}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-[#242424]">
+                      <p className="truncate text-sm font-semibold text-[var(--text)]">
                         {u.name}
                         {currentUser?.id === u.id && (
-                          <span className="ml-2 text-[10px] font-medium uppercase text-[#0078d4]">
+                          <span className="ml-2 text-[10px] font-medium uppercase text-[var(--accent)]">
                             You
                           </span>
                         )}
                       </p>
-                      <p className="truncate text-xs text-[#605e5c]">{u.email}</p>
+                      <p className="truncate text-xs text-[var(--text-muted)]">{u.email}</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => onSelect(u)}
-                      className="rounded px-2 py-1 text-xs font-medium text-[#0078d4] hover:bg-[#deecf9]"
+                      className="rounded px-2 py-1 text-xs font-medium text-[var(--accent)] hover:bg-[var(--accent-soft)]"
                     >
                       Switch
                     </button>
                     <button
                       type="button"
                       onClick={() => startEdit(u)}
-                      className="rounded px-2 py-1 text-xs font-medium text-[#323130] hover:bg-[#f3f2f1]"
+                      className="rounded px-2 py-1 text-xs font-medium text-[var(--text)] hover:bg-[var(--bg)]"
                     >
                       Edit
                     </button>
@@ -220,14 +221,14 @@ export default function UsersPanel({
                       type="button"
                       disabled={busy}
                       onClick={() => remove(u)}
-                      className="rounded px-2 py-1 text-xs font-medium text-[#a4262c] hover:bg-[#fde7e9]"
+                      className="rounded px-2 py-1 text-xs font-medium text-[var(--danger)] hover:bg-[var(--danger-bg)]"
                     >
                       Delete
                     </button>
                   </li>
                 ))}
                 {users.length === 0 && (
-                  <p className="py-8 text-center text-sm text-[#605e5c]">
+                  <p className="py-8 text-center text-sm text-[var(--text-muted)]">
                     No users yet. Add your first teammate.
                   </p>
                 )}
@@ -238,15 +239,17 @@ export default function UsersPanel({
               <button
                 type="button"
                 onClick={() => setMode("list")}
-                className="text-xs font-medium text-[#0078d4] hover:underline"
+                className="text-xs font-medium text-[var(--accent)] hover:underline"
               >
                 ← Back to list
               </button>
-              <h3 className="text-base font-semibold text-[#242424]">
+              <h3 className="text-base font-semibold text-[var(--text)]">
                 {mode === "create" ? "New user" : "Edit user"}
               </h3>
               <div>
-                <label className="mb-1 block text-xs font-semibold">Name</label>
+                <label className="mb-1 block text-xs font-semibold text-[var(--text)]">
+                  Name
+                </label>
                 <input
                   className="field-input"
                   value={name}
@@ -256,7 +259,9 @@ export default function UsersPanel({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold">Email</label>
+                <label className="mb-1 block text-xs font-semibold text-[var(--text)]">
+                  Email
+                </label>
                 <input
                   type="email"
                   className="field-input"
@@ -266,7 +271,9 @@ export default function UsersPanel({
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-semibold">Color</label>
+                <label className="mb-1.5 block text-xs font-semibold text-[var(--text)]">
+                  Color
+                </label>
                 <div className="flex flex-wrap gap-2">
                   {COLORS.map((c) => (
                     <button
@@ -274,7 +281,7 @@ export default function UsersPanel({
                       type="button"
                       onClick={() => setColor(c)}
                       className={`h-8 w-8 rounded-full ${
-                        color === c ? "ring-2 ring-[#0078d4] ring-offset-2" : ""
+                        color === c ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--surface)]" : ""
                       }`}
                       style={{ background: c }}
                     />
@@ -285,14 +292,14 @@ export default function UsersPanel({
                 <button
                   type="button"
                   onClick={() => setMode("list")}
-                  className="rounded border border-[#8a8886] px-4 py-2 text-sm"
+                  className="rounded border border-[var(--border-strong)] px-4 py-2 text-sm text-[var(--text)]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded bg-[#0078d4] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                  className="rounded bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   {busy ? "Saving…" : "Save"}
                 </button>

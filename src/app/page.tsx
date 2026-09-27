@@ -7,6 +7,7 @@ import Board from "@/components/Board";
 import TicketPanel from "@/components/TicketPanel";
 import UsersPanel from "@/components/UsersPanel";
 import UserBar from "@/components/UserBar";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function HomePage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -126,15 +127,15 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#f3f2f1] text-[#605e5c]">
+      <div className="flex h-screen items-center justify-center bg-[var(--bg)] text-[var(--text-muted)]">
         Loading board…
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen flex-col bg-[#f3f2f1]">
-      <header className="flex items-center justify-between gap-4 border-b border-[#edebe9] bg-[#0078d4] px-4 py-2.5 text-white shadow">
+    <div className="flex h-screen flex-col bg-[var(--bg)]">
+      <header className="flex items-center justify-between gap-4 border-b border-black/10 bg-[var(--header)] px-4 py-2.5 text-[var(--header-text)] shadow">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded bg-white/15 text-sm font-bold">
             TB
@@ -152,18 +153,21 @@ export default function HomePage() {
           onManage={() => setUsersOpen(true)}
         />
 
-        <button
-          onClick={openCreate}
-          disabled={!currentUser}
-          className="rounded bg-white px-4 py-2 text-sm font-semibold text-[#0078d4] hover:bg-[#deecf9] disabled:opacity-50"
-        >
-          + New work item
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            onClick={openCreate}
+            disabled={!currentUser}
+            className="rounded bg-white px-4 py-2 text-sm font-semibold text-[#0078d4] hover:bg-[#deecf9] disabled:opacity-50"
+          >
+            + New work item
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 overflow-x-auto p-4">
         {loadError && (
-          <div className="mb-3 rounded border border-[#f1aeb5] bg-[#fde7e9] px-3 py-2 text-sm text-[#a4262c]">
+          <div className="mb-3 rounded border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-sm text-[var(--danger)]">
             {loadError}
           </div>
         )}

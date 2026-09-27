@@ -34,7 +34,7 @@ export default function UserBar({
             title={`${u.name} (${u.email})`}
             className={`flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-semibold text-white transition ${
               currentUser?.id === u.id
-                ? "ring-2 ring-white ring-offset-1 ring-offset-[#0078d4]"
+                ? "ring-2 ring-white ring-offset-1 ring-offset-[var(--header)]"
                 : "opacity-80 hover:opacity-100"
             }`}
             style={{ background: u.color || "#005a9e" }}

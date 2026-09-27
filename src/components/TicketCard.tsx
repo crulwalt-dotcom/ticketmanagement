@@ -36,26 +36,29 @@ export default function TicketCard({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={onClick}
-      className={`cursor-grab rounded border border-slate-200 bg-white p-3 shadow-sm transition hover:shadow-md active:cursor-grabbing ${priorityRing[ticket.priority]}`}
+      className={`cursor-grab rounded border border-[var(--border)] bg-[var(--surface)] p-3 shadow-sm transition hover:brightness-[1.03] active:cursor-grabbing ${priorityRing[ticket.priority]}`}
+      style={{ boxShadow: "var(--card-shadow)" }}
     >
       <div className="mb-2 flex items-start gap-2">
         <span
           className={`mt-0.5 h-2.5 w-2.5 shrink-0 rounded-sm ${typeColor[ticket.type]}`}
           title={ticket.type}
         />
-        <h3 className="text-sm font-medium leading-snug text-slate-800">
+        <h3 className="text-sm font-medium leading-snug text-[var(--text)]">
           {ticket.title}
         </h3>
       </div>
 
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600">
+          <span className="rounded bg-[var(--surface-2)] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
             {ticket.type}
           </span>
-          <span className="text-[10px] text-slate-400">{ticket.priority}</span>
+          <span className="text-[10px] text-[var(--text-muted)]">{ticket.priority}</span>
           {ticket.images?.length > 0 && (
-            <span className="text-[10px] text-slate-400">📎 {ticket.images.length}</span>
+            <span className="text-[10px] text-[var(--text-muted)]">
+              📎 {ticket.images.length}
+            </span>
           )}
         </div>
         {assignee && (

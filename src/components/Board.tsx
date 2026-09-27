@@ -17,7 +17,7 @@ const columnAccent: Record<TicketStatus, string> = {
   New: "border-t-[#0078d4]",
   Active: "border-t-[#ca5010]",
   Resolved: "border-t-[#107c10]",
-  Closed: "border-t-[#605e5c]",
+  Closed: "border-t-[var(--text-muted)]",
 };
 
 export default function Board({
@@ -38,13 +38,13 @@ export default function Board({
         return (
           <div
             key={status}
-            className={`flex w-80 flex-col rounded border border-[#edebe9] border-t-4 bg-[#ebecf0] shadow-sm ${columnAccent[status]}`}
+            className={`flex w-80 flex-col rounded border border-[var(--border)] border-t-4 bg-[var(--column)] shadow-sm ${columnAccent[status]}`}
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => onDropColumn(status)}
           >
             <div className="flex items-center justify-between px-3 py-2.5">
-              <h2 className="text-sm font-semibold text-[#323130]">{status}</h2>
-              <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-[#605e5c] shadow-sm">
+              <h2 className="text-sm font-semibold text-[var(--text)]">{status}</h2>
+              <span className="rounded-full bg-[var(--surface)] px-2 py-0.5 text-xs font-medium text-[var(--text-muted)] shadow-sm">
                 {columnTickets.length}
               </span>
             </div>
@@ -60,7 +60,7 @@ export default function Board({
                 />
               ))}
               {columnTickets.length === 0 && (
-                <p className="px-1 py-8 text-center text-xs text-[#8a8886]">
+                <p className="px-1 py-8 text-center text-xs text-[var(--text-muted)]">
                   Drop work items here
                 </p>
               )}
