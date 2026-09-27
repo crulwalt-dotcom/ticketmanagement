@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Ticket, TicketType, User } from "@/lib/types";
 import { PRIORITIES, TYPES } from "@/lib/types";
+import RichDescription from "./RichDescription";
+import ImageLightbox from "./ImageLightbox";
 
 interface Props {
   ticket: Ticket | null;
@@ -30,13 +32,11 @@ export default function TicketPanel({
   const [pasteHint, setPasteHint] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const dropRef = useRef<HTMLDivElement>(null);
 
-  const uploadImage = useCallback(async (file: File) => {
-    if (!file.type.startsWith("image/")) return;
-    setUploading(true);
-    setError("");
+  const uploadAndGetUrl = useCallback(async (file: File): Promise<string | null> => {
+    if (!file.type.startsWith("image/")) return null;
     try {
       const fd = new FormData();
       fd.append("file", file);
@@ -44,45 +44,39 @@ export default function TicketPanel({
       const data = await res.json();
       if (!res.ok || !data.url) {
         setError(data?.error || "Upload failed");
-        return;
+        return null;
       }
-      setImages((prev) => [...prev, data.url]);
+      return data.url as string;
     } catch {
       setError("Upload failed");
-    } finally {
-      setUploading(false);
+      return null;
     }
   }, []);
 
-  useEffect(() => {
-    const onPaste = (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (const item of Array.from(items)) {
-        if (item.type.startsWith("image/")) {
-          e.preventDefault();
-          const file = item.getAsFile();
-          if (file) {
-            const named = new File([file], `paste-${Date.now()}.png`, {
-              type: file.type,
-            });
-            uploadImage(named);
-          }
-          break;
-        }
-      }
-    };
-    window.addEventListener("paste", onPaste);
-    return () => window.removeEventListener("paste", onPaste);
-  }, [uploadImage]);
+  const addAttachment = useCallback(
+    async (file: File) => {
+      setUploading(true);
+      setError("");
+      const url = await uploadAndGetUrl(file);
+      if (url) setImages((prev) => [...prev, url]);
+      setUploading(false);
+    },
+    [uploadAndGetUrl]
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (previewUrl) {
+          setPreviewUrl(null);
+          return;
+        }
+        onClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onClose, previewUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +86,7 @@ export default function TicketPanel({
     try {
       await onSave({
         title: title.trim(),
-        description: description.trim(),
+        description,
         type,
         priority,
         status,
@@ -106,12 +100,14 @@ export default function TicketPanel({
     }
   };
 
-  const onDrop = (e: React.DragEvent) => {
+  const onDropAttach = (e: React.DragEvent) => {
     e.preventDefault();
     setPasteHint(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) uploadImage(file);
+    if (file) addAttachment(file);
   };
+
+  const previewIndex = previewUrl ? images.indexOf(previewUrl) : -1;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -224,15 +220,21 @@ export default function TicketPanel({
               </select>
             </Field>
 
-            <Field label="Description">
-              <textarea
-                className="field-input min-h-[140px] resize-y"
-                rows={6}
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-[var(--text)]">
+                Description
+              </label>
+              <p className="mb-2 text-[11px] text-[var(--text-muted)]">
+                Write text, add checklist, and paste screenshots right under the
+                line — like Azure. Separate files go in Attachments below.
+              </p>
+              <RichDescription
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Repro steps, acceptance criteria, notes…"
+                onChange={setDescription}
+                onUploadImage={uploadAndGetUrl}
+                onOpenImage={setPreviewUrl}
               />
-            </Field>
+            </div>
 
             <div>
               <div className="mb-1.5 flex items-center justify-between">
@@ -240,17 +242,16 @@ export default function TicketPanel({
                   Attachments
                 </label>
                 <span className="text-[11px] text-[var(--text-muted)]">
-                  Ctrl+V to paste a screenshot
+                  Extra files (click to open)
                 </span>
               </div>
               <div
-                ref={dropRef}
                 onDragOver={(e) => {
                   e.preventDefault();
                   setPasteHint(true);
                 }}
                 onDragLeave={() => setPasteHint(false)}
-                onDrop={onDrop}
+                onDrop={onDropAttach}
                 className={`rounded border-2 border-dashed p-4 transition ${
                   pasteHint
                     ? "border-[var(--accent)] bg-[var(--drop-active)]"
@@ -260,12 +261,19 @@ export default function TicketPanel({
                 <div className="mb-3 flex flex-wrap gap-3">
                   {images.map((url) => (
                     <div key={url} className="group relative">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={url}
-                        alt="attachment"
-                        className="h-24 w-24 rounded border border-[var(--border)] object-cover shadow-sm"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => setPreviewUrl(url)}
+                        className="block"
+                        title="Open preview"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={url}
+                          alt="attachment"
+                          className="h-24 w-24 rounded border border-[var(--border)] object-cover shadow-sm transition hover:ring-2 hover:ring-[var(--accent)]"
+                        />
+                      </button>
                       <button
                         type="button"
                         onClick={() =>
@@ -288,8 +296,7 @@ export default function TicketPanel({
                     {uploading ? "Uploading…" : "Browse files"}
                   </button>
                   <p className="text-xs text-[var(--text-muted)]">
-                    Drop images here, or copy a screenshot and paste (Ctrl+V /
-                    ⌘V)
+                    Drop images here for separate attachments
                   </p>
                 </div>
                 <input
@@ -299,7 +306,7 @@ export default function TicketPanel({
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if (f) uploadImage(f);
+                    if (f) addAttachment(f);
                     e.target.value = "";
                   }}
                 />
@@ -344,6 +351,23 @@ export default function TicketPanel({
           </footer>
         </form>
       </aside>
+
+      {previewUrl && (
+        <ImageLightbox
+          url={previewUrl}
+          onClose={() => setPreviewUrl(null)}
+          onPrev={
+            previewIndex > 0
+              ? () => setPreviewUrl(images[previewIndex - 1])
+              : undefined
+          }
+          onNext={
+            previewIndex >= 0 && previewIndex < images.length - 1
+              ? () => setPreviewUrl(images[previewIndex + 1])
+              : undefined
+          }
+        />
+      )}
     </div>
   );
 }
