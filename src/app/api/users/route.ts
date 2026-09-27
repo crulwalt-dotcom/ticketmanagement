@@ -3,6 +3,17 @@ import { getDb } from "@/lib/mongodb";
 import { User } from "@/lib/types";
 import { v4 as uuid } from "uuid";
 
+function dbErrorMessage(e: unknown) {
+  const msg = e instanceof Error ? e.message : String(e);
+  if (msg.includes("MONGODB_URI")) {
+    return "Missing MONGODB_URI. Add it in Vercel → Settings → Environment Variables.";
+  }
+  if (/ENOTFOUND|ECONNREFUSED|timed out|SSL|authentication failed|IP|whitelist/i.test(msg)) {
+    return "Cannot reach MongoDB. Check Atlas Network Access (allow 0.0.0.0/0) and your URI.";
+  }
+  return "Failed to reach database.";
+}
+
 export async function GET() {
   try {
     const db = await getDb();
@@ -10,7 +21,7 @@ export async function GET() {
     return NextResponse.json(users);
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
+    return NextResponse.json({ error: dbErrorMessage(e) }, { status: 500 });
   }
 }
 
@@ -40,6 +51,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(user, { status: 201 });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
+    return NextResponse.json({ error: dbErrorMessage(e) }, { status: 500 });
   }
 }

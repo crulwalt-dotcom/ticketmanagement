@@ -12,16 +12,28 @@ export default function HomePage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Ticket | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const [uRes, tRes] = await Promise.all([fetch("/api/users"), fetch("/api/tickets")]);
-    const [uData, tData] = await Promise.all([uRes.json(), tRes.json()]);
-    setUsers(Array.isArray(uData) ? uData : []);
-    setTickets(Array.isArray(tData) ? tData : []);
-    setLoading(false);
+    try {
+      const [uRes, tRes] = await Promise.all([fetch("/api/users"), fetch("/api/tickets")]);
+      const [uData, tData] = await Promise.all([uRes.json(), tRes.json()]);
+      if (!uRes.ok) {
+        setLoadError(uData?.error || "Failed to load users from database.");
+        setUsers([]);
+      } else {
+        setUsers(Array.isArray(uData) ? uData : []);
+        setLoadError("");
+      }
+      setTickets(Array.isArray(tData) ? tData : []);
+    } catch {
+      setLoadError("Could not reach the API.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -144,6 +156,11 @@ export default function HomePage() {
       </header>
 
       <main className="flex-1 overflow-x-auto p-4">
+        {loadError && (
+          <div className="mb-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {loadError}
+          </div>
+        )}
         <Board
           statuses={STATUSES}
           tickets={tickets}

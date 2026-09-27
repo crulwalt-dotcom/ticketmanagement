@@ -11,16 +11,12 @@ function getClientPromise(): Promise<MongoClient> {
     throw new Error("Missing MONGODB_URI in environment");
   }
 
-  if (process.env.NODE_ENV === "development") {
-    if (!global._mongoClientPromise) {
-      const client = new MongoClient(uri);
-      global._mongoClientPromise = client.connect();
-    }
-    return global._mongoClientPromise;
+  // Reuse connection across hot reloads and Vercel serverless invocations
+  if (!global._mongoClientPromise) {
+    const client = new MongoClient(uri);
+    global._mongoClientPromise = client.connect();
   }
-
-  const client = new MongoClient(uri);
-  return client.connect();
+  return global._mongoClientPromise;
 }
 
 export async function getDb(): Promise<Db> {
