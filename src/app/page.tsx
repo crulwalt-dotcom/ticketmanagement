@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Ticket, TicketStatus, User } from "@/lib/types";
 import { STATUSES } from "@/lib/types";
 import Board from "@/components/Board";
-import TicketModal from "@/components/TicketModal";
+import TicketPanel from "@/components/TicketPanel";
+import UsersPanel from "@/components/UsersPanel";
 import UserBar from "@/components/UserBar";
 
 export default function HomePage() {
@@ -14,6 +15,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [usersOpen, setUsersOpen] = useState(false);
   const [editing, setEditing] = useState<Ticket | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
 
@@ -45,6 +47,9 @@ export default function HomePage() {
       const saved = localStorage.getItem("tb_user");
       const found = users.find((u) => u.id === saved) || users[0];
       setCurrentUser(found);
+    }
+    if (currentUser && users.length && !users.find((u) => u.id === currentUser.id)) {
+      setCurrentUser(users[0] || null);
     }
   }, [users, currentUser]);
 
@@ -79,6 +84,7 @@ export default function HomePage() {
         body: JSON.stringify({ id: editing.id, ...payload }),
       });
       const updated = await res.json();
+      if (!res.ok) throw new Error(updated.error || "Save failed");
       setTickets((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
     } else {
       const res = await fetch("/api/tickets", {
@@ -87,12 +93,14 @@ export default function HomePage() {
         body: JSON.stringify({ ...payload, createdBy: currentUser?.id }),
       });
       const created = await res.json();
+      if (!res.ok) throw new Error(created.error || "Create failed");
       setTickets((prev) => [...prev, created]);
     }
     setModalOpen(false);
   };
 
   const deleteTicket = async (id: string) => {
+    if (!confirm("Delete this work item?")) return;
     await fetch(`/api/tickets?id=${id}`, { method: "DELETE" });
     setTickets((prev) => prev.filter((t) => t.id !== id));
     setModalOpen(false);
@@ -118,24 +126,22 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center text-slate-500">
+      <div className="flex h-screen items-center justify-center bg-[#f3f2f1] text-[#605e5c]">
         Loading board…
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen flex-col">
-      <header className="flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 py-3 shadow-sm">
+    <div className="flex h-screen flex-col bg-[#f3f2f1]">
+      <header className="flex items-center justify-between gap-4 border-b border-[#edebe9] bg-[#0078d4] px-4 py-2.5 text-white shadow">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded bg-board-accent text-sm font-bold text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded bg-white/15 text-sm font-bold">
             TB
           </div>
           <div>
-            <h1 className="text-lg font-semibold leading-tight text-slate-800">
-              Ticket Board
-            </h1>
-            <p className="text-xs text-slate-500">Bugs · Features · Tasks</p>
+            <h1 className="text-base font-semibold leading-tight">Ticket Board</h1>
+            <p className="text-[11px] text-white/80">Bugs · Features · Tasks</p>
           </div>
         </div>
 
@@ -143,21 +149,21 @@ export default function HomePage() {
           users={users}
           currentUser={currentUser}
           onSelect={selectUser}
-          onUsersChange={setUsers}
+          onManage={() => setUsersOpen(true)}
         />
 
         <button
           onClick={openCreate}
           disabled={!currentUser}
-          className="rounded bg-board-accent px-4 py-2 text-sm font-medium text-white hover:bg-[#106ebe] disabled:opacity-50"
+          className="rounded bg-white px-4 py-2 text-sm font-semibold text-[#0078d4] hover:bg-[#deecf9] disabled:opacity-50"
         >
-          + New ticket
+          + New work item
         </button>
       </header>
 
       <main className="flex-1 overflow-x-auto p-4">
         {loadError && (
-          <div className="mb-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="mb-3 rounded border border-[#f1aeb5] bg-[#fde7e9] px-3 py-2 text-sm text-[#a4262c]">
             {loadError}
           </div>
         )}
@@ -173,13 +179,22 @@ export default function HomePage() {
       </main>
 
       {modalOpen && currentUser && (
-        <TicketModal
+        <TicketPanel
           ticket={editing}
           users={users}
-          currentUser={currentUser}
           onSave={saveTicket}
           onDelete={editing ? () => deleteTicket(editing.id) : undefined}
           onClose={() => setModalOpen(false)}
+        />
+      )}
+
+      {usersOpen && (
+        <UsersPanel
+          users={users}
+          currentUser={currentUser}
+          onUsersChange={setUsers}
+          onSelect={selectUser}
+          onClose={() => setUsersOpen(false)}
         />
       )}
     </div>

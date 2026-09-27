@@ -38,13 +38,13 @@ export default function Board({
         return (
           <div
             key={status}
-            className={`flex w-72 flex-col rounded-md border-t-4 bg-board-column ${columnAccent[status]}`}
+            className={`flex w-80 flex-col rounded border border-[#edebe9] border-t-4 bg-[#ebecf0] shadow-sm ${columnAccent[status]}`}
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => onDropColumn(status)}
           >
-            <div className="flex items-center justify-between px-3 py-2">
-              <h2 className="text-sm font-semibold text-slate-700">{status}</h2>
-              <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs text-slate-600">
+            <div className="flex items-center justify-between px-3 py-2.5">
+              <h2 className="text-sm font-semibold text-[#323130]">{status}</h2>
+              <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-[#605e5c] shadow-sm">
                 {columnTickets.length}
               </span>
             </div>
@@ -60,8 +60,8 @@ export default function Board({
                 />
               ))}
               {columnTickets.length === 0 && (
-                <p className="px-1 py-6 text-center text-xs text-slate-400">
-                  Drop tickets here
+                <p className="px-1 py-8 text-center text-xs text-[#8a8886]">
+                  Drop work items here
                 </p>
               )}
             </div>

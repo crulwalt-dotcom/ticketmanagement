@@ -8,7 +8,7 @@ body {
 }
 
 body {
-  background: #f0f2f5;
+  background: #f3f2f1;
   color: #242424;
 }
 
@@ -17,6 +17,27 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c8c8c8;
+  background: #c8c6c4;
   border-radius: 4px;
+}
+
+@layer components {
+  .field-input {
+    @apply w-full rounded border border-[#8a8886] bg-white px-3 py-2 text-sm outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4];
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.18s ease-out;
 }
