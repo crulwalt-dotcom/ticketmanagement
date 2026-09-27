@@ -8,6 +8,9 @@ import TicketPanel from "@/components/TicketPanel";
 import UsersPanel from "@/components/UsersPanel";
 import UserBar from "@/components/UserBar";
 import ThemeToggle from "@/components/ThemeToggle";
+import ChatView from "@/components/ChatView";
+
+type AppView = "board" | "chat";
 
 export default function HomePage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -19,6 +22,7 @@ export default function HomePage() {
   const [usersOpen, setUsersOpen] = useState(false);
   const [editing, setEditing] = useState<Ticket | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [view, setView] = useState<AppView>("board");
 
   const load = useCallback(async () => {
     try {
@@ -127,60 +131,128 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[var(--bg)] text-[var(--text-muted)]">
-        Loading board…
+      <div className="flex h-[100dvh] items-center justify-center bg-[var(--bg)] text-[var(--text-muted)]">
+        Loading…
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen flex-col bg-[var(--bg)]">
-      <header className="flex items-center justify-between gap-4 border-b border-black/10 bg-[var(--header)] px-4 py-2.5 text-[var(--header-text)] shadow">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded bg-white/15 text-sm font-bold">
-            TB
+    <div className="flex h-[100dvh] flex-col bg-[var(--bg)]">
+      {/* Top header */}
+      <header className="shrink-0 border-b border-black/10 bg-[var(--header)] text-[var(--header-text)] shadow">
+        <div className="flex items-center justify-between gap-2 px-3 py-2 sm:px-4 sm:py-2.5">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-white/15 text-xs font-bold sm:h-9 sm:w-9 sm:text-sm">
+              TB
+            </div>
+            <div className="min-w-0">
+              <h1 className="truncate text-sm font-semibold leading-tight sm:text-base">
+                Ticket Board
+              </h1>
+              <p className="hidden text-[11px] text-white/80 sm:block">
+                Bugs · Features · Tasks
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-base font-semibold leading-tight">Ticket Board</h1>
-            <p className="text-[11px] text-white/80">Bugs · Features · Tasks</p>
+
+          <div className="hidden flex-1 md:block">
+            <UserBar
+              users={users}
+              currentUser={currentUser}
+              onSelect={selectUser}
+              onManage={() => setUsersOpen(true)}
+            />
+          </div>
+
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <ThemeToggle />
+            {view === "board" && (
+              <button
+                onClick={openCreate}
+                disabled={!currentUser}
+                className="rounded bg-white px-2.5 py-1.5 text-xs font-semibold text-[#0078d4] hover:bg-[#deecf9] disabled:opacity-50 sm:px-4 sm:py-2 sm:text-sm"
+              >
+                <span className="sm:hidden">+ New</span>
+                <span className="hidden sm:inline">+ New work item</span>
+              </button>
+            )}
           </div>
         </div>
 
-        <UserBar
-          users={users}
-          currentUser={currentUser}
-          onSelect={selectUser}
-          onManage={() => setUsersOpen(true)}
-        />
+        {/* Desktop tabs */}
+        <div className="hidden items-center gap-1 px-4 pb-2 md:flex">
+          <NavTab active={view === "board"} onClick={() => setView("board")}>
+            Board
+          </NavTab>
+          <NavTab active={view === "chat"} onClick={() => setView("chat")}>
+            Chat
+          </NavTab>
+        </div>
 
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <button
-            onClick={openCreate}
-            disabled={!currentUser}
-            className="rounded bg-white px-4 py-2 text-sm font-semibold text-[#0078d4] hover:bg-[#deecf9] disabled:opacity-50"
-          >
-            + New work item
-          </button>
+        {/* Mobile user strip */}
+        <div className="border-t border-white/10 px-3 py-2 md:hidden">
+          <UserBar
+            users={users}
+            currentUser={currentUser}
+            onSelect={selectUser}
+            onManage={() => setUsersOpen(true)}
+            compact
+          />
         </div>
       </header>
 
-      <main className="flex-1 overflow-x-auto p-4">
+      <main className="min-h-0 flex-1 overflow-hidden p-2 pb-[calc(3.5rem+env(safe-area-inset-bottom))] sm:p-4 md:pb-4">
         {loadError && (
           <div className="mb-3 rounded border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-sm text-[var(--danger)]">
             {loadError}
           </div>
         )}
-        <Board
-          statuses={STATUSES}
-          tickets={tickets}
-          userMap={userMap}
-          dragId={dragId}
-          setDragId={setDragId}
-          onDropColumn={onDropColumn}
-          onOpen={openEdit}
-        />
+
+        {view === "board" ? (
+          <Board
+            statuses={STATUSES}
+            tickets={tickets}
+            userMap={userMap}
+            dragId={dragId}
+            setDragId={setDragId}
+            onDropColumn={onDropColumn}
+            onOpen={openEdit}
+          />
+        ) : currentUser ? (
+          <div className="h-full">
+            <ChatView users={users} currentUser={currentUser} />
+          </div>
+        ) : (
+          <p className="p-6 text-center text-sm text-[var(--text-muted)]">
+            Add a user first to use chat.
+          </p>
+        )}
       </main>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex border-t border-[var(--border)] bg-[var(--surface)] pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(0,0,0,0.06)] md:hidden">
+        <button
+          type="button"
+          onClick={() => setView("board")}
+          className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-semibold ${
+            view === "board" ? "text-[var(--accent)]" : "text-[var(--text-muted)]"
+          }`}
+        >
+          <span className="text-base">📋</span>
+          Board
+        </button>
+        <button
+          type="button"
+          onClick={() => setView("chat")}
+          className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-semibold ${
+            view === "chat" ? "text-[var(--accent)]" : "text-[var(--text-muted)]"
+          }`}
+        >
+          <span className="text-base">💬</span>
+          Chat
+        </button>
+      </nav>
 
       {modalOpen && currentUser && (
         <TicketPanel
@@ -202,5 +274,27 @@ export default function HomePage() {
         />
       )}
     </div>
+  );
+}
+
+function NavTab({
+  children,
+  active,
+  onClick,
+}: {
+  children: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded px-3 py-1 text-xs font-semibold ${
+        active ? "bg-white/20 text-white" : "text-white/70 hover:bg-white/10 hover:text-white"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

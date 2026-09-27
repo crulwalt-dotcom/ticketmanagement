@@ -144,7 +144,7 @@ export default function UsersPanel({
         style={{ background: "var(--overlay)" }}
         onClick={onClose}
       />
-      <aside className="relative z-10 flex h-full w-full max-w-[480px] animate-slide-in flex-col border-l border-[var(--border)] bg-[var(--surface)] shadow-2xl">
+      <aside className="relative z-10 flex h-full w-full max-w-full animate-slide-in flex-col border-l border-[var(--border)] bg-[var(--surface)] shadow-2xl sm:max-w-[480px]">
         <header className="flex items-start justify-between border-b border-[var(--border)] bg-[var(--surface-2)] px-5 py-4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--accent)]">

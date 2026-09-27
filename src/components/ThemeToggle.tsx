@@ -12,17 +12,17 @@ export default function ThemeToggle() {
       onClick={toggleTheme}
       title={isDark ? "Switch to light theme" : "Switch to dark theme"}
       aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
-      className="flex items-center gap-2 rounded border border-white/40 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20"
+      className="flex items-center gap-1.5 rounded border border-white/40 bg-white/10 px-2 py-1.5 text-xs font-semibold text-white hover:bg-white/20 sm:gap-2 sm:px-3"
     >
       {isDark ? (
         <>
           <SunIcon />
-          Light
+          <span className="hidden sm:inline">Light</span>
         </>
       ) : (
         <>
           <MoonIcon />
-          Dark
+          <span className="hidden sm:inline">Dark</span>
         </>
       )}
     </button>

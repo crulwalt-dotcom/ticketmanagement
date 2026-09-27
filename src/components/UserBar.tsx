@@ -7,6 +7,7 @@ interface Props {
   currentUser: User | null;
   onSelect: (user: User) => void;
   onManage: () => void;
+  compact?: boolean;
 }
 
 export default function UserBar({
@@ -14,6 +15,7 @@ export default function UserBar({
   currentUser,
   onSelect,
   onManage,
+  compact,
 }: Props) {
   const initials = (n: string) =>
     (n || "?")
@@ -24,10 +26,16 @@ export default function UserBar({
       .toUpperCase();
 
   return (
-    <div className="flex flex-1 items-center justify-center gap-3">
-      <span className="hidden text-xs text-white/80 sm:inline">Working as</span>
+    <div
+      className={`flex items-center gap-2 ${
+        compact ? "justify-start" : "flex-1 justify-center gap-3"
+      }`}
+    >
+      {!compact && (
+        <span className="hidden text-xs text-white/80 lg:inline">Working as</span>
+      )}
       <div className="flex items-center gap-1">
-        {users.slice(0, 8).map((u) => (
+        {users.slice(0, compact ? 4 : 8).map((u) => (
           <button
             key={u.id}
             onClick={() => onSelect(u)}
@@ -42,16 +50,18 @@ export default function UserBar({
             {initials(u.name)}
           </button>
         ))}
-        {users.length > 8 && (
-          <span className="px-1 text-xs text-white/80">+{users.length - 8}</span>
+        {users.length > (compact ? 4 : 8) && (
+          <span className="px-1 text-xs text-white/80">
+            +{users.length - (compact ? 4 : 8)}
+          </span>
         )}
       </div>
       <button
         type="button"
         onClick={onManage}
-        className="rounded border border-white/40 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20"
+        className="rounded border border-white/40 bg-white/10 px-2.5 py-1.5 text-[11px] font-semibold text-white hover:bg-white/20 sm:px-3 sm:text-xs"
       >
-        Manage users
+        {compact ? "Users" : "Manage users"}
       </button>
     </div>
   );

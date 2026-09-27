@@ -118,8 +118,8 @@ export default function TicketPanel({
         style={{ background: "var(--overlay)" }}
         onClick={onClose}
       />
-      <aside className="relative z-10 flex h-full w-full max-w-[720px] animate-slide-in flex-col border-l border-[var(--border)] bg-[var(--surface)] shadow-2xl">
-        <header className="flex items-start justify-between gap-4 border-b border-[var(--border)] bg-[var(--surface-2)] px-6 py-4">
+      <aside className="relative z-10 flex h-full w-full max-w-full animate-slide-in flex-col border-l border-[var(--border)] bg-[var(--surface)] shadow-2xl sm:max-w-[720px]">
+        <header className="flex items-start justify-between gap-4 border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 sm:px-6 sm:py-4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--accent)]">
               Work item
@@ -144,7 +144,7 @@ export default function TicketPanel({
         </header>
 
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
+          <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[var(--text)]">
                 Title
